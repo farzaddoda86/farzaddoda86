@@ -1,143 +1,0 @@
-<script>
-
-const calendar = document.getElementById("calendar");
-const menu = document.getElementById("menu");
-const menuTitle = document.getElementById("menuTitle");
-const tasksBox = document.getElementById("tasks");
-
-const days = [
-"شنبه","یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه"
-];
-
-function getProgram(dayNumber){
-
-// محاسبه روز هفته
-let weekday = dayNumber % 7;
-
-if(weekday === 5){ // پنجشنبه
-return [
-
-"🌅 صبح | اصلاحی کامل پای پرانتزی (۲۰ دقیقه آرام)",
-"• راه رفتن پنجه‌به‌داخل → ۳ دقیقه",
-"• اسکات با توپ بین زانوها → 3×15",
-"• Hip Abduction → 3×15 هر پا",
-"• کشش پشت پا → 2×30 ثانیه",
-
-"🕔 عصر | قدرت سنگین",
-"شنا → 6×20",
-"درازنشست → 6×20",
-"بارفیکس → 6×8",
-"کشش کامل → ۲۰ دقیقه",
-
-"💊 مکمل‌ها",
-"کلسیم + D بعد ناهار",
-"منیزیم بعد شام",
-"ARG+ قبل خواب"
-];
-}
-
-if(weekday === 6){ // جمعه
-return [
-"🟢 ریکاوری کامل",
-"پیاده‌روی سبک ۳۰ دقیقه",
-"کشش رشد قد عمیق → ۳۰ دقیقه",
-"حمام آب گرم + کشش داخل حمام",
-"❌ بدون تمرین سنگین",
-
-"💊 مکمل‌ها طبق روال"
-];
-}
-
-// شنبه تا چهارشنبه
-return [
-
-"🌅 صبح | اصلاحی (۱۰–۱۵ دقیقه)",
-"راه رفتن پنجه‌به‌داخل → ۲ دقیقه",
-"اسکات توپ بین زانوها → 3×15",
-"Hip Abduction → 3×15 هر پا",
-"کشش پشت پا → 2×30 ثانیه",
-
-"🍽 بعد ناهار",
-"کلسیم + ویتامین D (500mg)",
-
-"🥊 عصر | بوکس (۳۰–۴۰ دقیقه)",
-"طناب → ۵ دقیقه",
-"شادو بوکس → 3 راند 3 دقیقه",
-"تمرین ضربه + جاخالی",
-"سرد کردن → ۵ دقیقه",
-
-"💪 بدنسازی",
-"شنا → 5×20",
-"درازنشست → 5×20",
-"بارفیکس → 5×10",
-"⏱ استراحت 45–60 ثانیه",
-
-"🧘 کشش رشد قد (۱۵ دقیقه)",
-"آویزان شدن → 3×30ث",
-"کبرا → 3×20ث",
-"لمس پنجه → 3×20ث",
-"گربه–شتر → 15 تکرار",
-"ایستادن کنار دیوار → ۲ دقیقه",
-
-"🌙 شب",
-"منیزیم بعد شام",
-"ARG+ ۳۰–۶۰ دقیقه قبل خواب",
-"خواب قبل ۱۱ شب"
-];
-
-}
-
-for(let d=25; d<=59; d++){  // 25 بهمن تا 29 اسفند تقریبی
-const div=document.createElement("div");
-div.className="day";
-div.innerText=d;
-if(localStorage.getItem("done_"+d)) div.classList.add("done");
-div.onclick=()=>openDay(d);
-calendar.appendChild(div);
-}
-
-function openDay(day){
-menu.style.display="block";
-menuTitle.innerText="برنامه روز "+day;
-tasksBox.innerHTML="";
-
-const program=getProgram(day);
-
-program.forEach((t,i)=>{
-let id=`${day}_${i}`;
-let checked=localStorage.getItem(id)?"checked":"";
-tasksBox.innerHTML+=`
-<label>
-<input type="checkbox" ${checked}
-onchange="saveTask(${day},${i},this)">
-${t}
-</label>`;
-});
-}
-
-function saveTask(day,i,el){
-const key=`${day}_${i}`;
-if(el.checked) localStorage.setItem(key,"1");
-else localStorage.removeItem(key);
-checkDay(day);
-}
-
-function checkDay(day){
-let program=getProgram(day);
-let done=true;
-for(let i=0;i<program.length;i++){
-if(!localStorage.getItem(`${day}_${i}`)) done=false;
-}
-if(done){
-localStorage.setItem("done_"+day,"1");
-document.querySelectorAll(".day").forEach(d=>{
-if(d.innerText==day) d.classList.add("done");
-});
-}
-}
-
-function closeMenu(){
-menu.style.display="none";
-}
-
-</script>
