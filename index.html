@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>برنامه تمرینی تا عید</title>
+
+<style>
+body {
+  background:#2f4f6f;
+  font-family:tahoma;
+  color:#fff;
+  margin:0;
+  padding:10px;
+}
+h1 {text-align:center;}
+
+.calendar {
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:10px;
+  margin-top:20px;
+}
+.day {
+  background:#3e6288;
+  padding:15px;
+  text-align:center;
+  border-radius:12px;
+  cursor:pointer;
+}
+.day.done {
+  background:#2ecc71;
+  text-decoration:line-through;
+}
+.day:hover {background:#4e7aa6;}
+
+#menu {
+  position:fixed;
+  inset:0;
+  background:#000000dd;
+  display:none;
+  padding:20px;
+  overflow:auto;
+}
+#menu h2 {text-align:center;}
+label {
+  display:block;
+  margin:8px 0;
+}
+small {color:#ccc;}
+button {
+  margin-top:15px;
+  padding:10px 15px;
+  border:none;
+  border-radius:10px;
+  background:#1abc9c;
+  font-size:16px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>📅 برنامه تمرینی تا عید</h1>
+
+<div class="calendar" id="calendar"></div>
+
+<div id="menu">
+  <h2 id="menuTitle"></h2>
+  <div id="tasks"></div>
+  <button onclick="closeMenu()">بستن</button>
+</div>
+
+<script>
+const startDay = 25;
+const endDay = 29;
+const tasksTemplate = [
+  "شنا: 4×25 (استراحت 60ث)",
+  "درازنشست: 4×25 (45ث)",
+  "بارفیکس: 5×10 (90ث)",
+  "بوکس: 3 راند 3دقیقه",
+  "کشش کامل بدن: 10دقیقه",
+  "اصلاح پای پرانتزی: اسکوات اصلاحی 3×15",
+  "پل باسن: 3×20",
+  "ARG+ بعد تمرین",
+  "کلسیم + D صبح",
+  "منیزیم قبل خواب"
+];
+
+const calendar = document.getElementById("calendar");
+
+for(let d=startDay; d<=endDay; d++){
+  const div = document.createElement("div");
+  div.className="day";
+  div.innerText=d;
+  div.onclick=()=>openDay(d);
+  if(localStorage.getItem("done_"+d)) div.classList.add("done");
+  calendar.appendChild(div);
+}
+
+function openDay(day){
+  document.getElementById("menu").style.display="block";
+  document.getElementById("menuTitle").innerText="تمرینات روز "+day;
+  const box=document.getElementById("tasks");
+  box.innerHTML="";
+  tasksTemplate.forEach((t,i)=>{
+    const id=`${day}_${i}`;
+    const checked=localStorage.getItem(id)?"checked":"";
+    box.innerHTML+=`
+      <label>
+        <input type="checkbox" ${checked}
+        onchange="saveTask(${day},${i},this)">
+        ${t}
+      </label>`;
+  });
+}
+
+function saveTask(day,i,el){
+  const key=`${day}_${i}`;
+  if(el.checked) localStorage.setItem(key,"1");
+  else localStorage.removeItem(key);
+  checkDayDone(day);
+}
+
+function checkDayDone(day){
+  let done=true;
+  for(let i=0;i<tasksTemplate.length;i++){
+    if(!localStorage.getItem(`${day}_${i}`)) done=false;
+  }
+  if(done){
+    localStorage.setItem("done_"+day,"1");
+    document.querySelectorAll(".day").forEach(d=>{
+      if(d.innerText==day) d.classList.add("done");
+    });
+  }
+}
+
+function closeMenu(){
+  document.getElementById("menu").style.display="none";
+}
+
+// یادآوری ساده
+setTimeout(()=>{
+  alert("⏰ وقت تمرین امروزه!");
+}, 3000);
+</script>
+
+</body>
+</html>
