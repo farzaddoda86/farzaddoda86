@@ -3,147 +3,83 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>برنامه تمرینی تا عید</title>
-
+<title>برنامه قهرمانی تا عید</title>
+<meta name="theme-color" content="#1e3c72">
 <style>
-body {
-  background:#2f4f6f;
-  font-family:tahoma;
-  color:#fff;
-  margin:0;
-  padding:10px;
-}
-h1 {text-align:center;}
-
-.calendar {
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:10px;
-  margin-top:20px;
-}
-.day {
-  background:#3e6288;
-  padding:15px;
-  text-align:center;
-  border-radius:12px;
-  cursor:pointer;
-}
-.day.done {
-  background:#2ecc71;
-  text-decoration:line-through;
-}
-.day:hover {background:#4e7aa6;}
-
-#menu {
-  position:fixed;
-  inset:0;
-  background:#000000dd;
-  display:none;
-  padding:20px;
-  overflow:auto;
-}
-#menu h2 {text-align:center;}
-label {
-  display:block;
-  margin:8px 0;
-}
-small {color:#ccc;}
-button {
-  margin-top:15px;
-  padding:10px 15px;
-  border:none;
-  border-radius:10px;
-  background:#1abc9c;
-  font-size:16px;
-}
+body{font-family:Tahoma,sans-serif;background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff;margin:0;padding:15px}
+.container{max-width:540px;margin:auto;background:#ffffff12;backdrop-filter:blur(14px);padding:20px;border-radius:22px}
+h1{text-align:center;font-size:20px}
+.progress{height:10px;background:#ffffff30;border-radius:10px;overflow:hidden;margin:10px 0}
+.bar{height:100%;width:0%;background:#00ffcc;transition:.3s}
+.stats{display:flex;justify-content:space-between;font-size:14px;margin-bottom:10px}
+.day{background:#ffffff15;padding:12px;border-radius:14px;margin:8px 0;cursor:pointer}
+.day.done{background:#00c85155;text-decoration:line-through}
+.tasks{display:none;margin-top:8px}
+label{display:flex;align-items:center;margin:6px 0;font-size:14px}
+input{margin-left:8px;transform:scale(1.2)}
+.motivation{text-align:center;margin-top:10px;font-weight:bold;color:#ffeb3b}
 </style>
 </head>
-
 <body>
-
-<h1>📅 برنامه تمرینی تا عید</h1>
-
-<div class="calendar" id="calendar"></div>
-
-<div id="menu">
-  <h2 id="menuTitle"></h2>
-  <div id="tasks"></div>
-  <button onclick="closeMenu()">بستن</button>
+<div class="container">
+<h1>🏆 برنامه قهرمانی 25 بهمن تا 29 اسفند</h1>
+<div class="stats"><span id="points">امتیاز: 0</span><span id="streak">استریک: 0 روز</span></div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<div id="days"></div>
+<div class="motivation" id="motivation"></div>
 </div>
-
 <script>
-const startDay = 25;
-const endDay = 29;
-const tasksTemplate = [
-  "شنا: 4×25 (استراحت 60ث)",
-  "درازنشست: 4×25 (45ث)",
-  "بارفیکس: 5×10 (90ث)",
-  "بوکس: 3 راند 3دقیقه",
-  "کشش کامل بدن: 10دقیقه",
-  "اصلاح پای پرانتزی: اسکوات اصلاحی 3×15",
-  "پل باسن: 3×20",
-  "ARG+ بعد تمرین",
-  "کلسیم + D صبح",
-  "منیزیم قبل خواب"
-];
+const start=new Date(2026,1,14);
+const end=new Date(2026,2,20);
+const daysDiv=document.getElementById('days');
+const bar=document.getElementById('bar');
+const motivation=document.getElementById('motivation');
+const pointsEl=document.getElementById('points');
+const streakEl=document.getElementById('streak');
+let saved=JSON.parse(localStorage.getItem('plan')||'{}');
+let meta=JSON.parse(localStorage.getItem('meta')||'{"points":0,"streak":0}');
 
-const calendar = document.getElementById("calendar");
+function formatDate(d){return d.toLocaleDateString('fa-IR',{weekday:'long',day:'numeric',month:'long'})}
+function getTasks(date){const w=date.getDay();if(w===4)return['اصلاحی کامل (3×15)','قدرتی سبک (4×15)','کشش 20 دقیقه','ویتامین + خواب'];if(w===5)return['پیاده‌روی سبک','کشش عمیق 30 دقیقه','حمام گرم','ریکاوری کامل'];return['اصلاحی صبح (3×15)','بوکس 3×3 دقیقه','شنا 5×20 + درازنشست 5×20 + بارفیکس 5×10','کشش 15 دقیقه + ویتامین‌ها'];}
 
-for(let d=startDay; d<=endDay; d++){
-  const div = document.createElement("div");
-  div.className="day";
-  div.innerText=d;
-  div.onclick=()=>openDay(d);
-  if(localStorage.getItem("done_"+d)) div.classList.add("done");
-  calendar.appendChild(div);
+function updateStats(){
+ const totalDays=(end-start)/86400000+1;
+ const doneDays=Object.values(saved).filter(d=>d.done).length;
+ bar.style.width=Math.round((doneDays/totalDays)*100)+'%';
+ pointsEl.innerText='امتیاز: '+meta.points;
+ streakEl.innerText='استریک: '+meta.streak+' روز';
+ motivation.innerText=doneDays===totalDays?'🔥 افسانه شدی! کل برنامه فول شد':'ادامه بده سلطان 💪';
+ localStorage.setItem('meta',JSON.stringify(meta));
 }
 
-function openDay(day){
-  document.getElementById("menu").style.display="block";
-  document.getElementById("menuTitle").innerText="تمرینات روز "+day;
-  const box=document.getElementById("tasks");
-  box.innerHTML="";
-  tasksTemplate.forEach((t,i)=>{
-    const id=`${day}_${i}`;
-    const checked=localStorage.getItem(id)?"checked":"";
-    box.innerHTML+=`
-      <label>
-        <input type="checkbox" ${checked}
-        onchange="saveTask(${day},${i},this)">
-        ${t}
-      </label>`;
-  });
+let lastDone=null;
+for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+ const key=d.toISOString().slice(0,10);
+ const day=document.createElement('div');
+ day.className='day'+(saved[key]?.done?' done':'');
+ day.innerHTML=formatDate(d);
+ const tasksDiv=document.createElement('div');tasksDiv.className='tasks';
+ const tasks=getTasks(d);
+ tasks.forEach((t,i)=>{
+  const label=document.createElement('label');
+  const cb=document.createElement('input');cb.type='checkbox';cb.checked=saved[key]?.tasks?.[i]||false;
+  cb.onchange=()=>{
+   saved[key]=saved[key]||{};
+   saved[key].tasks=[...tasksDiv.querySelectorAll('input')].map(x=>x.checked);
+   const wasDone=saved[key].done;
+   saved[key].done=saved[key].tasks.every(Boolean);
+   if(!wasDone && saved[key].done){meta.points+=10;meta.streak+=1;}
+   if(wasDone && !saved[key].done){meta.streak=Math.max(0,meta.streak-1);}  
+   day.classList.toggle('done',saved[key].done);
+   localStorage.setItem('plan',JSON.stringify(saved));
+   updateStats();
+  };
+  label.appendChild(cb);label.appendChild(document.createTextNode(t));tasksDiv.appendChild(label);
+ });
+ day.onclick=()=>tasksDiv.style.display=tasksDiv.style.display?'':'block';
+ day.appendChild(tasksDiv);daysDiv.appendChild(day);
 }
-
-function saveTask(day,i,el){
-  const key=`${day}_${i}`;
-  if(el.checked) localStorage.setItem(key,"1");
-  else localStorage.removeItem(key);
-  checkDayDone(day);
-}
-
-function checkDayDone(day){
-  let done=true;
-  for(let i=0;i<tasksTemplate.length;i++){
-    if(!localStorage.getItem(`${day}_${i}`)) done=false;
-  }
-  if(done){
-    localStorage.setItem("done_"+day,"1");
-    document.querySelectorAll(".day").forEach(d=>{
-      if(d.innerText==day) d.classList.add("done");
-    });
-  }
-}
-
-function closeMenu(){
-  document.getElementById("menu").style.display="none";
-}
-
-// یادآوری ساده
-setTimeout(()=>{
-  alert("⏰ وقت تمرین امروزه!");
-}, 3000);
+updateStats();
 </script>
-
 </body>
 </html>
